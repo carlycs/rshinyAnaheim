@@ -19,10 +19,7 @@ library("forecast")
 library(RSNNS)
 library(dplyr)
 
-#convenience funtion for finding best arima model
-#sweep through variaous possiblilites of p,d,q
-#look for seasonal/non-seasonal
-#using auto.arima from package fpp
+
 
 arma.model.selection <- function (tsdata, p.max, d.max, q.max)
 {    print("Start")
@@ -121,35 +118,7 @@ plot_hybrid_forecast<- function(){
       lines(rr_f,col="blue",type="b")
       legend("topleft", c("Actual Value","Predicted during Validation","Forecast","Fitted Value"), col=c("black","red","blue","green"), lty=1)
       
-    }  else  if(input$model=="NN" & input$resi_plot=="Incident count"){
-      par(mfrow=c(1,1))
-      plot(tdata,xlim=as.POSIXct(c(min(index(tdata)),  max(index(tdata))+(nahead+1)*31)),
-           ylim=c(min(tdata,p_nn_fitted_ts,p_nn_forecast_ts,na.rm = TRUE)-2, max(tdata,p_nn_forecast_ts,p_nn_fitted_ts,na.rm = TRUE)+2 ) ,type="b",main=paste("NN Model Prediction ",code),ylab="Incident Count")
-      lines(p_nn_fitted_ts,col="green",type="b")
-      lines(p_nn_forecast_ts,col="blue",type="b")
-      lines(p_nn_forecast_v_ts,col="red",type="b")
-      legend("topleft", c("Actual Value","Predicted during Validation","Forecast","Fitted Value"), col=c("black","red","blue","green"), lty=1)
-      
-    } else if (input$model=="Hybrid ARIMA and NN" & input$resi_plot=="Incident count") {
-      par(mfrow=c(1,1))
-      plot(tdata,xlim=as.POSIXct(c(min(index(tdata),na.rm = TRUE),  max(index(tdata),na.rm = TRUE)+(nahead+1)*31)),
-      ylim=c(min(tdata,h_fitted_ts,pr_f,na.rm = TRUE)-2, max(tdata,pr_f,h_fitted_ts,na.rm = TRUE)+2 ) ,type="b",ylab="Incident Count",main=paste("Hybrid ARIMA and NN Model",code))
-      lines(pr_v_h,col="red",type="b")
-      lines(pr_f,type="b",col="blue")
-      lines(h_fitted_ts,col="green")
-      legend("topleft", c("Actual Value","Predicted during Validation","Forecast","Fitted Value"), col=c("black","red","blue","green"), lty=1)
-    } else {  
-    # } else if(input$resi_plot=="ALL Residues"){
-      par(mfrow=c(4,1))
-      plot(tdata,xlim=as.POSIXct(c(min(index(tdata)),  max(index(tdata))+(nahead+1)*31)),
-           ylim=c(min(tdata,na.rm = TRUE)-5, max(tdata,na.rm = TRUE)+5 ) ,type="l",ylab="Incident Count")
-      
-      plot(res_ts,ylab="Residue from ARIMA Model")
-      plot(p_nn_residuals_ts,ylab="Residue from NN")
-      plot(dnn_res_ts,ylab="Residue from Hybrid ARIMA_NN")
-      
-    }
-    
+    }  
   }
 ########################################
 #analyse_all_incidents and save results and model to file 
@@ -411,31 +380,6 @@ analyse_all_incidents<- function(){
                           DT::datatable(mdata[-1],rownames=FALSE)
                           
                           })
-  output$table_error <- DT::renderDataTable({
-    input$train
-    input$incident
-    edata<- read.csv("errors.csv")
-    edata[,c("RMSE","MAE")]<-round(edata[,c("RMSE","MAE")],digits = 4)
-    DT::datatable(edata[-1],rownames=FALSE)
-    
-  })
-  output$table_val <- DT::renderDataTable({
-    input$train
-    input$incident
-    edata<- read.csv("cross_validation_results.csv")
-    edata[,c("avg_val_rms" ,"avg_fitt_rms")]<- round(edata[,c("avg_val_rms" ,"avg_fitt_rms")],digits = 4)
-    DT::datatable(edata[-1],rownames=FALSE)
-  
-  })
-  
-  output$table_data_fore <- DT::renderDataTable({
-                        input$train
-                        input$incident
-                        fdata<- read.csv("forecast.csv")
-                        DT::datatable(fdata[,c( "date","code","ARIMA_forecast","NN_forecast" ,"hybrid_forecast")],rownames=FALSE)})
-    
-    
-  
-
+ 
 
 })
