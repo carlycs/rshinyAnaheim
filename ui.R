@@ -22,11 +22,19 @@ shinyUI(fluidPage(
                 actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
                 checkboxInput("save", "Update saved files", value = TRUE, width = NULL),
                 numericInput('nahead', 'Number of Rush Hours to List', 3,min = 1, max = 5),
-                h4("Results"),
+                #h4("Results"),
+                 
+                 h4("Results"),
+                h5("Queue Line"),
+                verbatimTextOutput("queue_line"),
+                h5("Next Expected H2 Delivery"),
+                verbatimTextOutput("next_expected_h2_delivery"),
+                h5("Today Rush Hours"),
+                verbatimTextOutput("today_rush_hours"),
                 #Every output should have a title and then the value.
-                numericInput('Queue Line', 'Most Likely Queue Line', 3,min = 0, max = 20),
-                numericInput('Next Expected H2 Delivery', 'Next Expected H2 Delivery', 1,min = 0, max = 20),
-                numericInput('Today Rush Hours', 'Today Rush Hours', 3,min = 0, max = 20),
+                #numericInput('Queue Line', 'Most Likely Queue Line', 3,min = 0, max = 20),
+                #numericInput('Next Expected H2 Delivery', 'Next Expected H2 Delivery', 1,min = 0, max = 20),
+                #numericInput('Today Rush Hours', 'Today Rush Hours', 3,min = 0, max = 20),
                 #numericInput('Queue Line2', 'Average Consumption Per car', 3,min = 0, max = 20)
                 
                 h4("Consumption Rates"),
