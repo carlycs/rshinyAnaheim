@@ -351,15 +351,15 @@ analyse_all_incidents<- function(){
                         )})
 
   output$plot_main <- renderPlot({ 
-                                    if(!file.exists("log_run.csv")){
-                                      print("-I- First Run , Training model")
-                                      analyse_all_incidents()
-                                      plot_hybrid_forecast() 
-                                      return()
-                                    } else {
-                                      print("-I- A model already exist , Dispalying data from that.")
-                                    plot_hybrid_forecast() 
-                                    }
+                                    #if(!file.exists("log_run.csv")){
+                                     # print("-I- First Run , Training model")
+                                      #analyse_all_incidents()
+                                      #plot_hybrid_forecast() 
+                                     # return()
+                                    #} else {
+                                     # print("-I- A model already exist , Dispalying data from that.")
+                                    #plot_hybrid_forecast() 
+                                    #}
                                       })
   
   observeEvent(input$train, {
@@ -380,6 +380,11 @@ analyse_all_incidents<- function(){
                           DT::datatable(mdata[-1],rownames=FALSE)
                           
                           })
+      
+       output$queue_line <-renderPrint(print("dummy"))
+  output$next_expected_h2_delivery <-renderPrint(print("dummy2"))
+  output$today_rush_hours <-renderPrint(print("dummy3"))
+
  
 
 })
