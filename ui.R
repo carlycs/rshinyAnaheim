@@ -1,4 +1,6 @@
 library(shiny)
+# Requirements
+# position items on grids and layer them correctly so they are mobile friendly and desktop friendly (use fluidPage, etc.)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
