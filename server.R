@@ -1,12 +1,13 @@
-#Created by Arunsdev
-#summary of functionality
-# 1. read incident count data from data.csv file 
-# 2. Run arima and hybrid of arima and nn on the data set for each of the incident 
+#Editted by Hoofar Pourzand
+#Fetched Originally from Nabeel M A 
+#summary of functionality for the first step
+# 0. clean the ui and server files to remove extra variables, outputs, Error Messages. 
+# 1. read Date and Hour from data.csv file - will be uploaded with the correct format.
+# 2. Run randomforest model
 # 3. store the results of this forecast , fitted values and residues in to forecast.csv and log_run.csv
-# 4. Render plot from this analysis based on the incident and type of plot selected 
+# 4. Render plot from this analysis and other four values to the ui
 # 5. model can be rerun by presing rerun button 
-# 6. changing any parmeter of model in the gui alos will rerun the model
-# 7. best models generated are stored .RData file for future reference or debug.
+# 6. changing any parmeter of model in the gui will rerun the model
 
 
 
