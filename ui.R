@@ -1,6 +1,10 @@
 library(shiny)
 # Requirements
 # position items on grids and layer them correctly so they are mobile friendly and desktop friendly (use fluidPage, etc.)
+# #Calender Selector should open a calender DateInput to select the date Use:
+    #For Dec 3rd, 2016 to June 3rd 2017, english- dateInput(inputId, label, value, min,
+    #max, format, startview, weekstart,
+    #language)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -10,16 +14,17 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(width = 3,
-                 h4("Select Day"),
+                 h4("Plan your Visit"),
                 uiOutput("ui"),
-                selectInput('resi_plot', 'Date', c("Today","Calender Selector")),
+                selectInput('resi_plot', 'Date and Hour', c("Now","Calender Selector")), #Calender Selector should open a calender DateInput to select the date
                 dateInput('dateinput', "label"),
                 selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
-                actionButton(inputId = "train", label = "Train Model with New data",class = "btn-primary"),
-                checkboxInput("save", "Update saved files", value = FALSE, width = NULL),
-                numericInput('nahead', 'Number of Rush Hours to List', 5,min = 1, max = 10),
+                actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
+                checkboxInput("save", "Update saved files", value = TRUE, width = NULL),
+                numericInput('nahead', 'Number of Rush Hours to List', 3,min = 1, max = 5),
                 h4("Results"),
-                numericInput('Queue Line', 'Queue Line', 3,min = 0, max = 20),
+                #Every output should have a title and then the value.
+                numericInput('Queue Line', 'Most Likely Queue Line', 3,min = 0, max = 20),
                 numericInput('Next Expected H2 Delivery', 'Next Expected H2 Delivery', 1,min = 0, max = 20),
                 numericInput('Today Rush Hours', 'Today Rush Hours', 3,min = 0, max = 20),
                 #numericInput('Queue Line2', 'Average Consumption Per car', 3,min = 0, max = 20)
@@ -44,6 +49,7 @@ shinyUI(fluidPage(
                  h2("Special Notes Table"),
                  DT::dataTableOutput('table_error'),
                  h2("Next Day"),
+                 #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
                  DT::dataTableOutput('table_val'),
          
                  
