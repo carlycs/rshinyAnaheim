@@ -1,18 +1,19 @@
 #Editted by Hoofar Pourzand
 #Fetched Originally from Nabeel M A 
+
 #summary of functionality for the first step
-# 0. clean the ui and server files to remove extra variables, outputs, Error Messages. 
-# 1. read Date and Hour from data.csv file - will be uploaded with the correct format.
+# 0. Clean the ui and server files to remove extra variables, outputs, Error Messages. 
+# 1. Read Date and Hour from data.csv file - will be uploaded with the correct format.
 # 2. Run randomforest model
-# 3. store the results of this forecast , fitted values and residues in to forecast.csv and log_run.csv
-# 4. Render plot from this analysis and other four values to the ui
-# 5. model can be rerun by presing rerun button 
-# 6. changing any parmeter of model in the gui will rerun the model
+# 3. Store the results of this forecast, fitted values and residues in to forecast.csv and log_run.csv
+# 4. Render plot from this analysis and other four values to ui.R
+# 5. Model can be rerun by pressing rerun button 
+# 6. Changing any parameter of model in the GUI will rerun the model
 
-
+source("global.R")
 
 arma.model.selection <- function (tsdata, p.max, d.max, q.max)
-{    print("Start")
+{     print("Start")
       D.max<-1
       best.aic <- 1e9
       best.model <- NA
@@ -23,13 +24,13 @@ arma.model.selection <- function (tsdata, p.max, d.max, q.max)
       for (seasonal in seasonal_l){
         for (D in 0:D.max) {
           for (d in 0:d.max) {
-           r <- list(aic=1e9)
-           
-            try(              r <- auto.arima(tsdata,max.p=p.max,max.order=50,d=d,D=D,
-                                              max.d=4,max.D=4,max.P=5, max.Q=5,approximation=FALSE,
-                                              seasonal=seasonal,stepwise=FALSE,
-                                              max.q=q.max,trace=FALSE,parallel=FALSE,num.cores=NULL)
-                             
+            r <- list(aic=1e9)
+            try(r <- auto.arima(tsdata,max.p=p.max,max.order=50,d=d,D=D,
+                                max.d=4,max.D=4,max.P=5, max.Q=5,
+                                approximation=FALSE,
+                                seasonal=seasonal,stepwise=FALSE,
+                                max.q=q.max,trace=FALSE,parallel=FALSE,
+                                num.cores=NULL)
             )
             
             #select based on best aic
@@ -48,27 +49,27 @@ arma.model.selection <- function (tsdata, p.max, d.max, q.max)
           }
         }
       }
-      list( best.aic = best.aic, 
-            best.model = best.model, 
-            best.d = best.d,best.D = best.D,best.seasonal=best.seasonal)
+      list(best.aic = best.aic, 
+           best.model = best.model, 
+           best.d = best.d,best.D = best.D,best.seasonal=best.seasonal)
 }
 
 rms <- function(x) sqrt(mean(x^2),na.rm=TRUE)
 ma <- function(x) mean(abs(x),na.rm=TRUE)
 
-
-
 dat<- Sys.Date()
 model_file<-paste0("model_saved",dat,".RData")
+
+#Start of connection to shinyServer
 
 shinyServer(function(input, output) {
 
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){
- nahead<-input$nahead
- code<- input$incident
- if(!file.exists("log_run.csv")){
-   print("First run !!! click train")
+  nahead<-input$nahead
+  code<- input$incident
+  if(!file.exists("log_run.csv")){
+    print("First run !!! click train")
  }
     #fitted values and residues are store in log_run.csv 
     mdata<- read.csv("log_run.csv")
@@ -398,7 +399,7 @@ run_hist <- function(hour_range,date_range) {
   #                         
   #                         })
       
-       output$queue_line <-renderPrint(print("dummy"))
+  output$queue_line <-renderPrint(print("dummy"))
   output$next_expected_h2_delivery <-renderPrint(print("dummy2"))
   output$today_rush_hours <-renderPrint(print("dummy3"))
 

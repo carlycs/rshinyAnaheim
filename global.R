@@ -1,13 +1,13 @@
 library(zoo)
 library(ggplot2)
 library(xts)
-library("forecast")
+library(forecast)
 library(RSNNS)
 library(dplyr)
-require(readr)
+library(readr)
 library(lubridate)
 
-#function.R wrapper function for getting and reciving data from Sercver.R 
+#function.R wrapper function for getting and receiving data from server.R 
 #some dummy data to start the develepement cycle on ui.R and server.R
 #everyline stores data for one hour
 serverdata <- read_csv("data.csv")
