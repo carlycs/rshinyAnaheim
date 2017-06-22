@@ -14,10 +14,12 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(width = 3,
+                 uiOutput("currentTime"),
                  uiOutput("dateChoiceType"),
                  uiOutput("dateCalendar"),
                  h4("Plan your Visit"),
                  uiOutput("chooseDate"),
+                 uiOutput("dateException"),
                  uiOutput("ui"),
                  sliderInput('date_time','Date and Time Range',
                              min=min(serverdata$datetimehourly),

@@ -1,7 +1,7 @@
-#Editted by Hoofar Pourzand
+#Edited by Hoofar Pourzand
 #Fetched Originally from Nabeel M A 
 
-#summary of functionality for the first step
+# Summary of functionality for the first step
 # 0. Clean the ui and server files to remove extra variables, outputs, Error Messages. 
 # 1. Read Date and Hour from data.csv file - will be uploaded with the correct format.
 # 2. Run randomforest model
@@ -62,7 +62,14 @@ model_file<-paste0("model_saved",dat,".RData")
 
 #Start of connection to shinyServer
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+  output$currentTime <- renderUI({
+    invalidateLater(as.integer(500),session)
+    localTime <- paste0(strong("Local Time: "), 
+                        format(Sys.time(), format = "%A, %B %e, %Y | %k:%M:%S %Z"))
+    HTML(paste(localTime, sep = '<br/>'))
+  })
+  
   dateChoiceOptions <- c("Today","Calendar")
   
   output$dateChoiceType <- renderUI({
@@ -81,6 +88,14 @@ shinyServer(function(input, output) {
     }
   })
   
+  chosenDate <- reactiveValues(date="")
+  
+  # assignDate <- reactive({
+  #   if (input$date_type == 'Today'){
+  #     chosenDate$date <- 
+  #   }
+  #   
+  # })
   
   output$queueLength <- renderPrint(print(serverdata$queueline[12]))
   output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
