@@ -21,13 +21,13 @@ shinyUI(fluidPage(
                  uiOutput("chooseDate"),
                  uiOutput("dateException"),
                  uiOutput("ui"),
-                 sliderInput('date_time','Date and Time Range',
-                             min=min(serverdata$datetimehourly),
-                             max=max(serverdata$datetimehourly),
-                             value=c(serverdata$datetimehourly[20],
-                                     serverdata$datetimehourly[300]),
-                             timezone='+0000'),
-                 sliderInput('highlight_hist','Highlight Hour',min=0,max=24,value=set_time()),
+                 # sliderInput('date_time','Date and Time Range',
+                 #             min=min(serverdata$datetimehourly),
+                 #             max=max(serverdata$datetimehourly),
+                 #             value=c(serverdata$datetimehourly[20],
+                 #                     serverdata$datetimehourly[300]),
+                 #             timezone='+0000'),
+                 # sliderInput('highlight_hist','Highlight Hour',min=0,max=24,value=set_time()),
                  selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
                  actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
                  checkboxInput("save", "Update saved files", value = TRUE, width = NULL),
@@ -71,12 +71,10 @@ shinyUI(fluidPage(
                  DT::dataTableOutput('table_data_fore'),
                  h2("Special Notes Table"),
                  DT::dataTableOutput('table_error'),
-                 h2("Next Day"),
+                 actionButton("prevDay", "Previous Day"), 
+                 actionButton("nextDay", "Next Day"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
                  DT::dataTableOutput('table_val'),
-         
-                 
-                 h2("Previous Day"),
                  DT::dataTableOutput('table_data')
                  
           )

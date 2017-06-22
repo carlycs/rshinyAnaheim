@@ -6,6 +6,7 @@ library(RSNNS)
 library(dplyr)
 library(readr)
 library(lubridate)
+library(plotly)
 
 #function.R wrapper function for getting and receiving data from server.R 
 #some dummy data to start the develepement cycle on ui.R and server.R
