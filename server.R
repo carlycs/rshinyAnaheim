@@ -64,6 +64,13 @@ model_file<-paste0("model_saved",dat,".RData")
 
 shinyServer(function(input, output) {
 
+  str(serverdata$datetimehourly)
+
+  output$queueInfo <- renderUI({
+    queueLength <- serverdata$queueline[12]
+    queueDay <- serverdata$datetimehourly[12]
+})
+
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){
   nahead<-input$nahead
