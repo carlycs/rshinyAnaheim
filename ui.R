@@ -66,7 +66,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(8,
                  #plotOutput("plot_main", width = 800, height = 600),
-                 plotOutput('hist_react',width=800,height=500),
+                 #plotOutput('hist_react',width=800,height=500),
                  h2("Traffic and Weather Updates"),
                  DT::dataTableOutput('table_data_fore'),
                  h2("Special Notes Table"),

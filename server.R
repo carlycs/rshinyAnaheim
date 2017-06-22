@@ -84,7 +84,7 @@ shinyServer(function(input, output, session) {
   output$dateCalendar <- renderUI({
     req(input$date_type)
     if((input$date_type)=="Calendar"){
-      dateInput("calendarDateInput","Calendar")
+      dateInput("calendarDateInput","Calendar",format = "yyyy-mm-dd")
     }
   })
   
@@ -93,12 +93,23 @@ shinyServer(function(input, output, session) {
   assignDate <- reactive({
     req(input$date_type)
     if (input$date_type == 'Today'){
-      chosenDate$date <- format(Sys.time(), format = "%Y-%m-%d")
+      chosenDate$date <- Sys.time()
     }
     else if(input$date_type == 'Calendar'){
       chosenDate$date <- format(input$calendarDateInput, format = "%Y-%m-%d")
     }
   })
+  
+  observeEvent(input$prevDay,{
+    updateSelectizeInput(session,"date_type",selected="Calendar")
+    updateDateInput(session,"calendarDateInput",(as.Date(chosenDate$date)-days(1)))
+  })
+  
+  observeEvent(input$nextDay,{
+    updateSelectizeInput(session,"date_type",selected="Calendar",(as.Date(chosenDate$date)+days(1)))
+  })
+  
+  
   
   output$queueLength <- renderPrint(print(serverdata$queueline[12]))
   output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
