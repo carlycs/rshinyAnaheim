@@ -44,10 +44,12 @@ shinyUI(fluidPage(
                 #numericInput('Today Rush Hours', 'Today Rush Hours', 3,min = 0, max = 20),
                 #numericInput('Queue Line2', 'Average Consumption Per car', 3,min = 0, max = 20)
                 
-                h4("Consumption Rates"),
-                #numericInput('nnsize', 'Average Consumption Per car', 8,min = 2, max = 20),
-                #numericInput('nnp', 'Number of non-seasonal lags', 3,min = 2, max = 30),
-                numericInput('maxiter', '(kg)', 53, min = 50, max = 100)
+                # h4("Consumption Rates"),
+                # #numericInput('nnsize', 'Average Consumption Per car', 8,min = 2, max = 20),
+                # #numericInput('nnp', 'Number of non-seasonal lags', 3,min = 2, max = 30),
+                # numericInput('maxiter', '(kg)', 53, min = 50, max = 100)
+                h5("Out of Gas Likelihood"),
+                uiOutput("outofgaslikelihood")
     
           ),
     
