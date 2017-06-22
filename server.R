@@ -64,8 +64,6 @@ model_file<-paste0("model_saved",dat,".RData")
 
 shinyServer(function(input, output) {
 
-  str(serverdata$datetimehourly)
-
   output$queueLength <- renderPrint(print(serverdata$queueline[12]))
   output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
   output$outofgaslikelihood <- renderPrint(print(serverdata$outofgaslikelihood[12]))
