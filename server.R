@@ -64,6 +64,11 @@ model_file<-paste0("model_saved",dat,".RData")
 
 shinyServer(function(input, output) {
 
+  str(serverdata$datetimehourly)
+
+  output$queueLength <- renderPrint(print(serverdata$queueline[12]))
+  output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
+
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){
   nahead<-input$nahead
@@ -398,8 +403,6 @@ run_hist <- function(hour_range,date_range) {
   #                         DT::datatable(mdata[-1],rownames=FALSE)
   #                         
   #                         })
-      
-  output$queue_line <-renderPrint(print("dummy"))
   output$next_expected_h2_delivery <-renderPrint(print("dummy2"))
   output$today_rush_hours <-renderPrint(print("dummy3"))
 
