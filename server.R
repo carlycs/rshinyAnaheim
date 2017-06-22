@@ -101,12 +101,26 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$prevDay,{
-    updateSelectizeInput(session,"date_type",selected="Calendar")
-    updateDateInput(session,"calendarDateInput",(as.Date(chosenDate$date)-days(1)))
+    req(input$date_type)
+    if (input$date_type!="Calendar"){
+      updateSelectizeInput(session,"date_type",selected="Calendar")
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+    }
+    else{
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+    }
+    
   })
   
   observeEvent(input$nextDay,{
-    updateSelectizeInput(session,"date_type",selected="Calendar",(as.Date(chosenDate$date)+days(1)))
+    req(input$date_type)
+    if (input$date_type!="Calendar"){
+      updateSelectizeInput(session,"date_type",selected="Calendar")
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+    }
+    else{
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+    }
   })
   
   
