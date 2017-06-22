@@ -14,8 +14,6 @@ serverdata <- read_csv("data.csv")
 serverdata$datetimehourly <- mdy_hm(serverdata$datetimehourly, tz = "UTC")
 serverdata$yearMonthDay <- format(serverdata$datetimehourly, format = "%Y-%m-%d")
 
-
-
 set_time <- function() {
   this_hour <- hour(Sys.time())
   if(this_hour<21 && this_hour>2) {
@@ -28,8 +26,6 @@ set_time <- function() {
     }
   }
 }
-
-
 
 #recive a date and time from server.R 
 

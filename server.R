@@ -90,12 +90,15 @@ shinyServer(function(input, output, session) {
   
   chosenDate <- reactiveValues(date="")
   
-  # assignDate <- reactive({
-  #   if (input$date_type == 'Today'){
-  #     chosenDate$date <- 
-  #   }
-  #   
-  # })
+  assignDate <- reactive({
+    req(input$date_type)
+    if (input$date_type == 'Today'){
+      chosenDate$date <- format(Sys.time(), format = "%Y-%m-%d")
+    }
+    else if(input$date_type == 'Calendar'){
+      chosenDate$date <- format(input$calendarDateInput, format = "%Y-%m-%d")
+    }
+  })
   
   output$queueLength <- renderPrint(print(serverdata$queueline[12]))
   output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
