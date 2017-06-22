@@ -326,50 +326,58 @@ analyse_all_incidents<- function(){
 # Histogram Reaction function
 
 run_hist <- function(hour_range,date_range) {
-  
   filter(serverdata,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
     mutate(days=day(datetimehourly),
            hours=hour(datetimehourly),
            hours_ampm=if_else(hours<13,paste0(hours,' AM'),paste0(hours-12,' PM')),
            hours_ampm=recode(hours_ampm,`0 AM`='12 AM',
                              `12 AM`='12 PM'),
+           hours_ampm=factor(hours_ampm,levels=c(paste0(c(12,1:11),' AM'),
+                                                 paste0(c(12,1:11),' PM'))),
            highlight_hour=if_else(hours==hour(Sys.time()),TRUE,FALSE)) %>% 
-    ggplot(aes(x=hours_ampm)) + geom_bar(aes(fill=highlight_hour))
+    filter(hours>hour_range[1] & hours<hour_range[2]) %>% 
+    ggplot(aes(x=hours_ampm)) + geom_bar(aes(fill=highlight_hour)) +
+    theme_minimal() + theme(panel.grid=element_blank()) + 
+    xlab("") + ylab("Queue Lines") +
+    guides(fill=FALSE) + 
+    scale_fill_brewer()
+
   
   
     
 }
   
 #######################################  
-  read_table_data <- function(){
-    data<-read.csv("data.csv")
-    return(unique(data$Code))
-  }
-   output$ui <- renderUI({
-                           if(!file.exists("data.csv")){
-                             print("-E- Input file data.csv !!! Not found in directory")
-                             flush.console()
-                             return()
-                           } 
-                         code_list<-read_table_data()
-                        selectInput("incident", "incident",
-                                    choices = code_list,
-                                    selected = code_list[1]
-                        )})
-
-  output$plot_main <- renderPlot({ 
-                                    #if(!file.exists("log_run.csv")){
-                                     # print("-I- First Run , Training model")
-                                      #analyse_all_incidents()
-                                      #plot_hybrid_forecast() 
-                                     # return()
-                                    #} else {
-                                     # print("-I- A model already exist , Dispalying data from that.")
-                                    #plot_hybrid_forecast() 
-                                    #}
-                                      })
+  # read_table_data <- function(){
+  #   data<-read.csv("data.csv")
+  #   return(unique(data$Code))
+  # }
+  #  output$ui <- renderUI({
+  #                          if(!file.exists("data.csv")){
+  #                            print("-E- Input file data.csv !!! Not found in directory")
+  #                            flush.console()
+  #                            return()
+  #                          } 
+  #                        code_list<-read_table_data()
+  #                       selectInput("incident", "incident",
+  #                                   choices = code_list,
+  #                                   selected = code_list[1]
+  #                       )})
+  # 
+  # output$plot_main <- renderPlot({ 
+  #                                   #if(!file.exists("log_run.csv")){
+  #                                    # print("-I- First Run , Training model")
+  #                                     #analyse_all_incidents()
+  #                                     #plot_hybrid_forecast() 
+  #                                    # return()
+  #                                   #} else {
+  #                                    # print("-I- A model already exist , Dispalying data from that.")
+  #                                   #plot_hybrid_forecast() 
+  #                                   #}
+  #                                     })
   output$hist_react <- renderPlot({
-    run_hist(input$highlight_hist,input$date_time)
+      run_hist(input$highlight_hist,input$date_time) %>% 
+      print
   })
   observeEvent(input$train, {
                             if(!file.exists("data.csv")){
@@ -382,13 +390,13 @@ run_hist <- function(hour_range,date_range) {
                             }
                )
   
-  output$table_data <- DT::renderDataTable({
-                          input$train
-                          input$incident
-                          mdata<- read.csv("log_run.csv")
-                          DT::datatable(mdata[-1],rownames=FALSE)
-                          
-                          })
+  # output$table_data <- DT::renderDataTable({
+  #                         input$train
+  #                         input$incident
+  #                         mdata<- read.csv("log_run.csv")
+  #                         DT::datatable(mdata[-1],rownames=FALSE)
+  #                         
+  #                         })
       
        output$queue_line <-renderPrint(print("dummy"))
   output$next_expected_h2_delivery <-renderPrint(print("dummy2"))
