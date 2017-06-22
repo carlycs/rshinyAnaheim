@@ -22,7 +22,7 @@ shinyUI(fluidPage(
                             value=c(serverdata$datetimehourly[20],
                                     serverdata$datetimehourly[300]),
                             timezone='+0000'),
-                sliderInput('highlight_hist','Highlight Hour',min=0,max=24,value=12),
+                sliderInput('highlight_hist','Highlight Hour',min=0,max=24,value=c(9,5)),
                 dateInput('dateinput', "label"),
                 selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
                 actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),

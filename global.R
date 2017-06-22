@@ -11,7 +11,7 @@ library(lubridate)
 #some dummy data to start the develepement cycle on ui.R and server.R
 #everyline stores data for one hour
 serverdata <- read_csv("data.csv")
-serverdata$datetimehourly <- mdy_hm(serverdata$datetimehourly, tz="GMT")
+serverdata$datetimehourly <- mdy_hm(serverdata$datetimehourly, tz="UTC")
 
 
 
