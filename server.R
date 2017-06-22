@@ -11,16 +11,6 @@
 
 
 
-
-library(zoo)
-library(ggplot2)
-library(xts)
-library("forecast")
-library(RSNNS)
-library(dplyr)
-
-
-
 arma.model.selection <- function (tsdata, p.max, d.max, q.max)
 {    print("Start")
       D.max<-1
@@ -331,7 +321,24 @@ analyse_all_incidents<- function(){
       #save the best models 
       save(dnn_list,mb_list,p_nn_list,file=model_file)
     }
-  }
+}
+
+# Histogram Reaction function
+
+run_hist <- function(hour_range,date_range) {
+  
+  filter(serverdata,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
+    mutate(days=day(datetimehourly),
+           hours=hour(datetimehourly),
+           hours_ampm=if_else(hours<13,paste0(hours,' AM'),paste0(hours-12,' PM')),
+           hours_ampm=recode(hours_ampm,`0 AM`='12 AM',
+                             `12 AM`='12 PM'),
+           highlight_hour=if_else(hours==hour(Sys.time()),TRUE,FALSE)) %>% 
+    ggplot(aes(x=hours_ampm)) + geom_bar(aes(fill=highlight_hour))
+  
+  
+    
+}
   
 #######################################  
   read_table_data <- function(){
@@ -361,7 +368,9 @@ analyse_all_incidents<- function(){
                                     #plot_hybrid_forecast() 
                                     #}
                                       })
-  
+  output$hist_react <- renderPlot({
+    run_hist(input$highlight_hist,input$date_time)
+  })
   observeEvent(input$train, {
                             if(!file.exists("data.csv")){
                               print("-E- Input file data.csv !!! Not found in directory")

@@ -16,7 +16,12 @@ shinyUI(fluidPage(
     sidebarPanel(width = 3,
                  h4("Plan your Visit"),
                 uiOutput("ui"),
-                selectInput('resi_plot', 'Date and Hour', c("Now","Calender Selector")), #Calender Selector should open a calender DateInput to select the date
+                sliderInput('date_time','Date and Time Range',
+                            min=min(serverdata$datetimehourly),
+                            max=max(serverdata$datetimehourly),
+                            value=c(serverdata$datetimehourly[20],
+                                    serverdata$datetimehourly[300])),
+                sliderInput('highlight_hist','Highlight Hour',min=0,max=24),
                 dateInput('dateinput', "label"),
                 selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
                 actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
@@ -51,7 +56,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(8,
                  plotOutput("plot_main", width = 800, height = 600),
-                 
+                 plotOutput('hist_react',width=800,height=300),
                  h2("Traffic and Weather Updates"),
                  DT::dataTableOutput('table_data_fore'),
                  h2("Special Notes Table"),
