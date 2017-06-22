@@ -135,14 +135,14 @@ analyse_all_incidents<- function(){
     q.max=input$q.max
     d.max=input$d.max
     #variables for accumulating data over multiple incidents
-      fdata_full<- NULL
-      mdata_full<-NULL
-      mb_list<-NULL
-      dnn_list<-NULL
-      p_nn_list<-NULL
-      error_df<-NULL
+      fdata_full <- NULL
+      mdata_full <- NULL
+      mb_list <- NULL
+      dnn_list <- NULL
+      p_nn_list <- NULL
+      error_df <- NULL
       cross_v_df_m <- NULL
-      cross_v_df_m_avg_m<-NULL
+      cross_v_df_m_avg_m <- NULL
     #iterate over all the incidents 
     code_list<- unique(data_clean$Code)
     for (code in code_list[1:5]){  

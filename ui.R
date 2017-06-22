@@ -1,4 +1,4 @@
-library(shiny)
+require(shiny)
 # Requirements
 # position items on grids and layer them correctly so they are mobile friendly and desktop friendly (use fluidPage, etc.)
 # #Calender Selector should open a calender DateInput to select the date Use:
