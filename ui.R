@@ -1,4 +1,4 @@
-require(shiny)
+library(shiny)
 # Requirements
 # position items on grids and layer them correctly so they are mobile friendly and desktop friendly (use fluidPage, etc.)
 # #Calender Selector should open a calender DateInput to select the date Use:
@@ -14,7 +14,7 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(width = 3,
-                 h4("Plan your Visit"),
+                h4("Plan your Visit"),
                 uiOutput("ui"),
                 sliderInput('date_time','Date and Time Range',
                             min=min(serverdata$datetimehourly),
@@ -23,14 +23,13 @@ shinyUI(fluidPage(
                                     serverdata$datetimehourly[300]),
                             timezone='+0000'),
                 sliderInput('highlight_hist','Highlight Hour',min=0,max=24,value=set_time()),
-                dateInput('dateinput', "label"),
                 selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
                 actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
                 checkboxInput("save", "Update saved files", value = TRUE, width = NULL),
                 numericInput('nahead', 'Number of Rush Hours to List', 3,min = 1, max = 5),
                 #h4("Results"),
                  
-                 h4("Results"),
+                h4("Results"),
                 h5("Queue Line"),
                 verbatimTextOutput("queue_line"),
                 h5("Next Expected H2 Delivery"),
@@ -46,7 +45,7 @@ shinyUI(fluidPage(
                 h4("Consumption Rates"),
                 #numericInput('nnsize', 'Average Consumption Per car', 8,min = 2, max = 20),
                 #numericInput('nnp', 'Number of non-seasonal lags', 3,min = 2, max = 30),
-                numericInput('maxiter', '(kg)', 53,min = 50, max = 100)
+                numericInput('maxiter', '(kg)', 53, min = 50, max = 100)
     
           ),
     
