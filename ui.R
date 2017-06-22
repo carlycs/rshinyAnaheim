@@ -31,7 +31,9 @@ shinyUI(fluidPage(
                  
                 h4("Results"),
                 h5("Queue Line"),
-                verbatimTextOutput("queue_line"),
+                uiOutput("queueDay"),
+                uiOutput("queueLength"),
+                textOutput(serverdata$queueline[12]),
                 h5("Next Expected H2 Delivery"),
                 verbatimTextOutput("next_expected_h2_delivery"),
                 h5("Today Rush Hours"),
