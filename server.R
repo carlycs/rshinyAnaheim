@@ -63,7 +63,24 @@ model_file<-paste0("model_saved",dat,".RData")
 #Start of connection to shinyServer
 
 shinyServer(function(input, output) {
-
+  dateChoiceOptions <- c("Today","Calendar")
+  
+  output$dateChoiceType <- renderUI({
+    selectizeInput('date_type', 'Date', 
+                   choices = dateChoiceOptions,
+                   options = list(placeholder = 'Select a date below',
+                                  onInitialize = I('function() { this.setValue(""); }')
+                   )
+    )
+  })
+  
+  output$dateCalendar <- renderUI({
+    if((input$date_type)=="Calendar"){
+      dateInput("calendarDateInput","Calendar")
+    }
+  })
+  
+  
   output$queueLength <- renderPrint(print(serverdata$queueline[12]))
   output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
   output$outofgaslikelihood <- renderPrint(print(serverdata$outofgaslikelihood[12]))

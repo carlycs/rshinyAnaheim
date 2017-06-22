@@ -15,6 +15,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(width = 3,
                  uiOutput("dateChoiceType"),
+                 uiOutput("dateCalendar"),
                  h4("Plan your Visit"),
                  uiOutput("chooseDate"),
                  uiOutput("ui"),
