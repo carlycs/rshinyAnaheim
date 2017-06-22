@@ -75,6 +75,7 @@ shinyServer(function(input, output) {
   })
   
   output$dateCalendar <- renderUI({
+    req(input$date_type)
     if((input$date_type)=="Calendar"){
       dateInput("calendarDateInput","Calendar")
     }
