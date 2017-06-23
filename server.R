@@ -88,10 +88,17 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  chosenDate <- reactiveValues(date=as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d"))))
+  dateToday <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
+  chosenDate <- reactiveValues(date=dateToday)
+  stateTracker <- reactiveValues(activeDate=dateToday)
   print(str(isolate(chosenDate$date)))
   
   output$debugDate <- renderPrint(paste0("You have chosen: ",chosenDate$date))
+  
+  observeEvent(input$calendarDateInput != stateTracker$activeDate,{
+    chosenDate$date <- input$calendarDateInput
+    stateTracker$activeDate <- chosenDate$date
+  })
   
   observeEvent(input$dateType=="Today",{
     chosenDate$date <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
@@ -101,49 +108,42 @@ shinyServer(function(input, output, session) {
     req(input$dateType)
     if (input$dateType!="Calendar"){
       updateSelectizeInput(session,"dateType",selected="Calendar")
-      #updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
       chosenDate$date <- chosenDate$date - days(1)
     }
     else{
       updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
       chosenDate$date <- chosenDate$date - days(1)
     }
-    
   })
   
   observeEvent(input$nextDay,{
     req(input$dateType)
     if (input$dateType!="Calendar"){
       updateSelectizeInput(session,"dateType",selected="Calendar")
-      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput + days(1))
       chosenDate$date <- chosenDate$date + days(1)
     }
     else{
-      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput + days(1))
       chosenDate$date <- chosenDate$date + days(1)
     }
   })
   
   
-  dateData <- reactiveValues(dateFrame = NULL)
+  dateData <- reactiveValues(dateFrame = subset(serverData, yearMonthDay == dateToday))
+  output$dateDataDebug <- renderPrint(
+    str(isolate(dateData$dateFrame))
+  )
   
-  updateDateData <- reactive({
-      req(input$dateType)
-      if(input$dateType == "Today"){
-          dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
-          print(str(dateData$dateFrame))
-      }
-      else if(input$dateType == "Calendar"){
-          dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
-          print(str(dateData$dateFrame))
-      }
-  })
+  observeEvent(!is.null(chosenDate$date),{
+    dateData$dateFrame <- subset(serverData,yearMonthDay==chosenDate$date)
+    }
+  )
   
-  
-  
-  output$queueLength <- renderPrint(print(serverData$queueline[12]))
-  output$queueDay <- renderPrint(print(serverData$datetimehourly[12]))
-  output$outofgaslikelihood <- renderPrint(print(serverData$outofgaslikelihood[12]))
+  output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
+  output$queueLength <- renderPrint(print(dateData$dataFrame$queueline))
+  output$outofgaslikelihood <- renderPrint(print(dateData$dataFrame$outofgaslikelihood))
 
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){

@@ -18,6 +18,7 @@ shinyUI(fluidPage(
                  uiOutput("dateChoiceType"),
                  uiOutput("dateCalendar"),
                  uiOutput("debugDate"),
+                 uiOutput("dateDataDebug"),
                  h4("Plan your Visit"),
                  uiOutput("chooseDate"),
                  uiOutput("dateException"),
