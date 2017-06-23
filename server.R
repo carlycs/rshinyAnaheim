@@ -168,6 +168,7 @@ shinyServer(function(input, output, session) {
     makeBarplot()
   })
   
+  # Data outputs
   output$queueDay <- renderPrint(print(dateData$dateFrame$yearMonthDay[1]))
   output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
   output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
