@@ -74,7 +74,8 @@ shinyUI(fluidPage(
                  #DT::dataTableOutput('table_data_fore'),
                  #h2("Special Notes Table"),
                  #DT::dataTableOutput('table_error'),
-                 plotlyOutput("barplot"),
+                 plotlyOutput("barplot", height = "auto"),
+                 br(),
                  actionButton("prevDay", "Previous Day"), 
                  actionButton("nextDay", "Next Day"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 

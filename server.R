@@ -94,10 +94,16 @@ shinyServer(function(input, output, session) {
   # Intialize reactiveValues
   chosenDate <- reactiveValues(date=dateToday)
   stateTracker <- reactiveValues(activeDate=dateToday)
+  dateData <- reactiveValues(dateFrame = subset(serverData, yearMonthDay == dateToday))
   
   # Debugging code to check active date
-  print(str(isolate(chosenDate$date)))
-  output$debugDate <- renderPrint(paste0("You have chosen: ",chosenDate$date))
+  # print(str(isolate(chosenDate$date)))
+  # output$debugDate <- renderPrint(paste0("You have chosen: ",chosenDate$date))
+  
+  # Debugging code to check currently selected dataframe
+  # output$dateDataDebug <- renderPrint(
+  #   str(isolate(dateData$dateFrame))
+  # )
   
   observeEvent(input$dateType=="Today",{
     chosenDate$date <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
@@ -131,11 +137,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  dateData <- reactiveValues(dateFrame = subset(serverData, yearMonthDay == dateToday))
-  output$dateDataDebug <- renderPrint(
-    str(isolate(dateData$dateFrame))
-  )
-  
   observeEvent(!is.null(chosenDate$date),{
     dateData$dateFrame <- subset(serverData,yearMonthDay==chosenDate$date)
     }
@@ -159,7 +160,7 @@ shinyServer(function(input, output, session) {
     final <- p + scale_y_continuous(expand = c(0,1)) + ylim(0,1.0) + 
       scale_fill_gradient(low = "#1A9850", high = "#D73027", limits=c(0,1)) +
       theme(legend.title=element_blank())
-    finalPlot <- ggplotly(final)
+    finalPlot <- ggplotly(final) %>% config(displayModeBar = F) %>% layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE))
     return(finalPlot)
   })
   
