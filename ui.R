@@ -10,7 +10,7 @@ library(shiny)
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Configuration"),
+  titlePanel("Configuration", windowTitle = "Anaheim Station Forecasts"),
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(width = 3,
@@ -64,8 +64,7 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      fluidPage(
-        titlePanel("Anaheim Station Forecasts"),
+        (titlePanel("Anaheim Station Forecasts")),
         fluidRow(
           column(9,
                  #plotOutput("plot_main", width = 800, height = 600),
@@ -76,8 +75,7 @@ shinyUI(fluidPage(
                  #DT::dataTableOutput('table_error'),
                  plotlyOutput("barplot", width = "100%"),
                  br(),
-                 actionButton("prevDay", "Previous Day"), 
-                 actionButton("nextDay", "Next Day"),
+                 div(actionButton("prevDay", "Previous Day"), actionButton("nextDay", "Next Day"), align = "center"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
                  DT::dataTableOutput('table_val'),
                  DT::dataTableOutput('table_data')
@@ -85,8 +83,6 @@ shinyUI(fluidPage(
           )
         )
       )
-      
-    )
   )
 ))
 
