@@ -8,7 +8,7 @@
 # Application title
 ui.main <-
   tagList(
-    titlePanel("Configuration", windowTitle = "Anaheim Station Forecasts"),
+    uiOutput("appTitle"),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
       sidebarPanel(width = 3,

@@ -134,6 +134,14 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  output$appTitle <- renderUI({
+    if(login()$role == "Manager"){
+      titlePanel(paste0("Configuration", login()$role), windowTitle = "Anaheim Station Forecasts")
+    } else if(login()$role == "User"){
+      titlePanel(paste0(login()$role, "blah"), windowTitle = "Anaheim Station Forecasts")
+    }
+  })
+  
   output$currentTime <- renderUI({
     invalidateLater(as.integer(500),session)
     localTime <- paste0(strong("Local Time: "), 
