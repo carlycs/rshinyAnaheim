@@ -146,21 +146,26 @@ shinyServer(function(input, output, session) {
     chosenDate$date <- input$calendarDateInput
     stateTracker$activeDate <- chosenDate$date
     dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
+    output$barplot <- renderPlotly({makeBarplot()})
   })
   
-  
-  
-  output$barplot <- renderPlotly({
+  # Function to make barplot, and check for empty dataframe
+  makeBarplot <- reactive({
     p <- ggplot(dateData$dateFrame, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
-    p <- p + labs(x = "Hour", y = "Out of Gas Likelihood (1-5)", 
+    p <- p + labs(x = "Hour", y = "Out of Gas Likelihood", 
                   title = paste0("Out of Gas Likelihood By Hour For ",
                                  format(dateToday,format="%B %d, %Y"))
-                  )
+    )
     final <- p + scale_y_continuous(expand = c(0,1)) + ylim(0,1.0) + 
       scale_fill_gradient(low = "#1A9850", high = "#D73027", limits=c(0,1)) +
       theme(legend.title=element_blank())
     finalPlot <- ggplotly(final)
     return(finalPlot)
+  })
+  
+  # Function that acutally outputs barplot plotly object
+  output$barplot <- renderPlotly({
+    makeBarplot()
   })
   
   output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
