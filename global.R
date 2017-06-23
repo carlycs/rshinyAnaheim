@@ -48,7 +48,7 @@ userAuthDatabase <- data.frame(UserId=c("Hoofar", "Leon"),
 
 validateLogin <- function(userId, password){
   stopifnot(exists("userAuthDatabase"))
-  authResult <- filter(userAuthDatabase, UserId == userId & Password == password)
+  authResult <- dplyr::filter(userAuthDatabase, UserId == userId & Password == password)
   if(nrow(authResult) == 1){
     # Successful login
     with(
