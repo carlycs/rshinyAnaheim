@@ -17,10 +17,12 @@ shinyUI(fluidPage(
                  uiOutput("currentTime"),
                  uiOutput("dateChoiceType"),
                  uiOutput("dateCalendar"),
+                 uiOutput("debugDate"),
                  h4("Plan your Visit"),
                  uiOutput("chooseDate"),
                  uiOutput("dateException"),
-                 uiOutput("ui"),
+                 # uiOutput("ui"),
+                 
                  # sliderInput('date_time','Date and Time Range',
                  #             min=min(serverData$datetimehourly),
                  #             max=max(serverData$datetimehourly),

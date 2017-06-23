@@ -13,7 +13,7 @@ library(plotly)
 #everyline stores data for one hour
 serverData <- read_csv("data.csv")
 serverData$datetimehourly <- mdy_hm(serverData$datetimehourly, tz = "UTC")
-serverData$yearMonthDay <- format(serverData$datetimehourly, format = "%Y-%m-%d")
+serverData$yearMonthDay <- as.POSIXct(format(serverData$datetimehourly, format = "%Y-%m-%d"))
 
 set_time <- function() {
   this_hour <- hour(Sys.time())

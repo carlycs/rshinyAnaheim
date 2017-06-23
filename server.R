@@ -72,52 +72,55 @@ shinyServer(function(input, output, session) {
   
   dateChoiceOptions <- c("Today","Calendar")
   
+  # Output for date type dropdown menu
   output$dateChoiceType <- renderUI({
-    selectizeInput('date_type', 'Date', 
+    selectizeInput('dateType', 'Date', 
                    choices = dateChoiceOptions,
                    selected = "Today"
     )
   })
   
+  # Output for calendar selection menu; conditional on date type dropdown menu
   output$dateCalendar <- renderUI({
-    req(input$date_type)
-    if((input$date_type)=="Calendar"){
+    req(input$dateType)
+    if((input$dateType)=="Calendar"){
       dateInput("calendarDateInput","Calendar",format = "yyyy-mm-dd")
     }
   })
   
-  chosenDate <- reactiveValues(date="")
+  chosenDate <- reactiveValues(date=as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d"))))
+  print(str(isolate(chosenDate$date)))
   
-  assignDate <- reactive({
-    req(input$date_type)
-    if (input$date_type == 'Today'){
-      chosenDate$date <- format(Sys.time(), format = "%Y-%m-%d")
-    }
-    else if(input$date_type == 'Calendar'){
-      chosenDate$date <- format(input$calendarDateInput, format = "%Y-%m-%d")
-    }
+  output$debugDate <- renderPrint(paste0("You have chosen: ",chosenDate$date))
+  
+  observeEvent(input$dateType=="Today",{
+    chosenDate$date <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
   })
   
   observeEvent(input$prevDay,{
-    req(input$date_type)
-    if (input$date_type!="Calendar"){
-      updateSelectizeInput(session,"date_type",selected="Calendar")
-      updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+    req(input$dateType)
+    if (input$dateType!="Calendar"){
+      updateSelectizeInput(session,"dateType",selected="Calendar")
+      #updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+      chosenDate$date <- chosenDate$date - days(1)
     }
     else{
       updateDateInput(session,"calendarDateInput",value=input$calendarDateInput-days(1))
+      chosenDate$date <- chosenDate$date - days(1)
     }
     
   })
   
   observeEvent(input$nextDay,{
-    req(input$date_type)
-    if (input$date_type!="Calendar"){
-      updateSelectizeInput(session,"date_type",selected="Calendar")
+    req(input$dateType)
+    if (input$dateType!="Calendar"){
+      updateSelectizeInput(session,"dateType",selected="Calendar")
       updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+      chosenDate$date <- chosenDate$date + days(1)
     }
     else{
       updateDateInput(session,"calendarDateInput",value=input$calendarDateInput+days(1))
+      chosenDate$date <- chosenDate$date + days(1)
     }
   })
   
@@ -125,12 +128,12 @@ shinyServer(function(input, output, session) {
   dateData <- reactiveValues(dateFrame = NULL)
   
   updateDateData <- reactive({
-      req(input$date_type)
-      if(input$date_type == "Today"){
+      req(input$dateType)
+      if(input$dateType == "Today"){
           dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
           print(str(dateData$dateFrame))
       }
-      else if(input$date_type == "Calendar"){
+      else if(input$dateType == "Calendar"){
           dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
           print(str(dateData$dateFrame))
       }
