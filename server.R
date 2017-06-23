@@ -88,17 +88,16 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # dateToday used as a system time variable
   dateToday <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
+  
+  # Intialize reactiveValues
   chosenDate <- reactiveValues(date=dateToday)
   stateTracker <- reactiveValues(activeDate=dateToday)
+  
+  # Debugging code to check active date
   print(str(isolate(chosenDate$date)))
-  
   output$debugDate <- renderPrint(paste0("You have chosen: ",chosenDate$date))
-  
-  observeEvent(input$calendarDateInput != stateTracker$activeDate,{
-    chosenDate$date <- input$calendarDateInput
-    stateTracker$activeDate <- chosenDate$date
-  })
   
   observeEvent(input$dateType=="Today",{
     chosenDate$date <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
@@ -142,8 +141,17 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$histogram <- renderPlotly({
-    p <- ggplot(testSet, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
+  # Check to see if date has changed
+  observeEvent(input$calendarDateInput != stateTracker$activeDate,{
+    chosenDate$date <- input$calendarDateInput
+    stateTracker$activeDate <- chosenDate$date
+    dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
+  })
+  
+  
+  
+  output$barplot <- renderPlotly({
+    p <- ggplot(dateData$dateFrame, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
     p <- p + labs(x = "Hour", y = "Out of Gas Likelihood (1-5)", 
                   title = paste0("Out of Gas Likelihood By Hour For ",
                                  format(dateToday,format="%B %d, %Y"))
