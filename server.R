@@ -104,6 +104,7 @@ shinyServer(function(input, output, session) {
     chosenDate$date <- as.POSIXct(format(format(Sys.time(), format = "%Y-%m-%d")))
   })
   
+  # Previous Day Button
   observeEvent(input$prevDay,{
     req(input$dateType)
     if (input$dateType!="Calendar"){
@@ -117,6 +118,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # Next Day Button
   observeEvent(input$nextDay,{
     req(input$dateType)
     if (input$dateType!="Calendar"){
@@ -140,12 +142,18 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$histogram <- renderPlotly(
-    p <- ggplot(testSet, aes(x=hour,fill=queueline)) + geom_bar(aes(weight=queueline)),
+  output$histogram <- renderPlotly({
+    p <- ggplot(testSet, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
     p <- p + labs(x = "Hour", y = "Out of Gas Likelihood (1-5)", 
-                  title = paste0("Out of Gas Likelihood By Hour For ",dateToday)),
-    p <- p + scale_colour_manual(values=scalePalette)
-  )
+                  title = paste0("Out of Gas Likelihood By Hour For ",
+                                 format(dateToday,format="%B %d, %Y"))
+                  )
+    final <- p + scale_y_continuous(expand = c(0,1)) + ylim(0,1.0) + 
+      scale_fill_gradient(low = "#1A9850", high = "#D73027", limits=c(0,1)) +
+      theme(legend.title=element_blank())
+    finalPlot <- ggplotly(final)
+    return(finalPlot)
+  })
   
   output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
   output$queueLength <- renderPrint(print(dateData$dataFrame$queueline))
