@@ -140,9 +140,12 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  # output$histogram <- renderPlotly(
-  #   queueHistogram <- plot_ly(x = )
-  # )
+  output$histogram <- renderPlotly(
+    p <- ggplot(testSet, aes(x=hour,fill=queueline)) + geom_bar(aes(weight=queueline)),
+    p <- p + labs(x = "Hour", y = "Out of Gas Likelihood (1-5)", 
+                  title = paste0("Out of Gas Likelihood By Hour For ",dateToday)),
+    p <- p + scale_colour_manual(values=scalePalette)
+  )
   
   output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
   output$queueLength <- renderPrint(print(dateData$dataFrame$queueline))

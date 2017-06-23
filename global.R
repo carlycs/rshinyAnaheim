@@ -18,6 +18,9 @@ serverData$datetimehourly <- as.POSIXct(serverData$datetimehourly)
 serverData$yearMonthDay <- as.POSIXct(format(serverData$datetimehourly, format = "%Y-%m-%d"))
 serverData$hour <- format(serverData$datetimehourly, format = "%H")
 
+scalePalette <- brewer.pal(6,"RdYlGn")
+scalePalette <- scalePalette[6:1]
+
 set_time <- function() {
   this_hour <- hour(Sys.time())
   if(this_hour<21 && this_hour>2) {
