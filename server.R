@@ -10,48 +10,48 @@
 # 5. Model can be rerun by pressing rerun button 
 # 6. Changing any parameter of model in the GUI will rerun the model
 
-source("global.R")
+# source("global.R") # Leon's Note June 23: This is automatically sourced 
 
 arma.model.selection <- function (tsdata, p.max, d.max, q.max)
 {     print("Start")
-      D.max<-1
-      best.aic <- 1e9
-      best.model <- NA
-      best.D <- NA
-      best.d <- NA
-      best.seasonal<- NA
-      seasonal_l<- c(TRUE,FALSE)
-      for (seasonal in seasonal_l){
-        for (D in 0:D.max) {
-          for (d in 0:d.max) {
-            r <- list(aic=1e9)
-            try(r <- auto.arima(tsdata,max.p=p.max,max.order=50,d=d,D=D,
-                                max.d=4,max.D=4,max.P=5, max.Q=5,
-                                approximation=FALSE,
-                                seasonal=seasonal,stepwise=FALSE,
-                                max.q=q.max,trace=FALSE,parallel=FALSE,
-                                num.cores=NULL)
-            )
-            
-            #select based on best aic
-            #aic is measure of information loss 
-            #lower  the better
-            if (r$aic < best.aic)
-            {
-              print(sprintf("best.aic=%f", best.aic))
-              print(sprintf("aic=%f", r$aic))
-              best.aic <- r$aic
-              best.model <- r
-              best.d <-d
-              best.D<- D
-              best.seasonal<- seasonal
-            }
-          }
+  D.max<-1
+  best.aic <- 1e9
+  best.model <- NA
+  best.D <- NA
+  best.d <- NA
+  best.seasonal<- NA
+  seasonal_l<- c(TRUE,FALSE)
+  for (seasonal in seasonal_l){
+    for (D in 0:D.max) {
+      for (d in 0:d.max) {
+        r <- list(aic=1e9)
+        try(r <- auto.arima(tsdata,max.p=p.max,max.order=50,d=d,D=D,
+                            max.d=4,max.D=4,max.P=5, max.Q=5,
+                            approximation=FALSE,
+                            seasonal=seasonal,stepwise=FALSE,
+                            max.q=q.max,trace=FALSE,parallel=FALSE,
+                            num.cores=NULL)
+        )
+        
+        #select based on best aic
+        #aic is measure of information loss 
+        #lower  the better
+        if (r$aic < best.aic)
+        {
+          print(sprintf("best.aic=%f", best.aic))
+          print(sprintf("aic=%f", r$aic))
+          best.aic <- r$aic
+          best.model <- r
+          best.d <-d
+          best.D<- D
+          best.seasonal<- seasonal
         }
       }
-      list(best.aic = best.aic, 
-           best.model = best.model, 
-           best.d = best.d,best.D = best.D,best.seasonal=best.seasonal)
+    }
+  }
+  list(best.aic = best.aic, 
+       best.model = best.model, 
+       best.d = best.d,best.D = best.D,best.seasonal=best.seasonal)
 }
 
 rms <- function(x) sqrt(mean(x^2),na.rm=TRUE)
@@ -63,6 +63,85 @@ model_file<-paste0("model_saved",dat,".RData")
 #Start of connection to shinyServer
 
 shinyServer(function(input, output, session) {
+  # Login logic ####
+  rvlogin <- reactiveValues(login = FALSE, user = NULL, role = NULL, email = NULL)
+  login <- reactive({ rvlogin })
+  
+  # initially display the login modal
+  observe({ composeLoginModal() })
+  
+  # Logs out user
+  observeEvent(input$logout_ok, {
+    shiny::removeModal()
+    
+    # clear the values when logout is confirmed
+    rvlogin$login <- FALSE
+    rvlogin$user  <- NULL
+    rvlogin$role  <- NULL
+    
+    composeLoginModal(
+      div(
+        id    = "modal-logout-message"
+        , style = "margin-bottom: 10px"
+        , span(class = "text-muted", "Successfully Logged Out")
+      ) #/ modal-logout-message
+    ) #/ composeLoginModal
+  })
+  
+  # once a login is attempted, do some checks
+  observeEvent(input$login_button, {
+    # remove the modal while we check
+    shiny::removeModal()
+    
+    # try to login, will automatically handle NULL-y objects
+    loginResult <- validateLogin(input$login_user, input$login_passwd)
+    
+    # if the login is not successful, toss up another login modal, 
+    # this time with a message
+    if (!loginResult$login) {
+      composeLoginModal(
+        div(
+          id    = "modal-login-message"
+          , style = "margin-bottom: 10px"
+          , span(style = "color: red; font-weight:bold", "Incorrect Login/Password")
+        ) #/ modal-login-message
+      ) #/ composeLoginModal
+    } else {
+      # if the login is successful, populate the known values
+      rvlogin$login <- TRUE
+      rvlogin$user  <- loginResult$user
+      rvlogin$role  <- loginResult$role
+    }
+  }) #/ login_button Observer
+  
+  # Display main ui iff user is logged in
+  output$mainUI <- renderUI({
+    req(login()$login)
+    ui.main # sourced from ui.main.R
+  })
+  
+  # ----------------------------------------------------------------
+  # Main App logic ####
+  output$selectModelTraining <- renderUI({
+    if(login()$role == "Manager"){
+      tagList(
+        selectInput('model', 'From Which Model', c("RF","NNetwork","RF and NNetwork"),selected="RF and NNetwork"),
+        actionButton(inputId = "livetrain", label = "Train Model with Live Data",class = "btn-primary"),
+        checkboxInput("save", "Update saved files", value = TRUE, width = NULL)
+      )
+    } else if(login()$role == "User"){
+      NULL
+    }
+  })
+  
+  output$appTitle <- renderUI({
+    if(login()$role == "Manager"){
+      titlePanel(paste0("Configuration", login()$role), windowTitle = "Anaheim Station Forecasts")
+    } else if(login()$role == "User"){
+      titlePanel(paste0(login()$role, "blah"), windowTitle = "Anaheim Station Forecasts")
+    }
+  })
+  
   output$currentTime <- renderUI({
     invalidateLater(as.integer(500),session)
     localTime <- paste0(strong("Local Time: "), 
@@ -139,7 +218,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(!is.null(chosenDate$date),{
     dateData$dateFrame <- subset(serverData,yearMonthDay==chosenDate$date)
-    }
+  }
   )
   
   # Check to see if date has changed
@@ -177,14 +256,14 @@ shinyServer(function(input, output, session) {
   output$queueDay <- renderPrint(print(dateData$dateFrame$yearMonthDay[1]))
   output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
   output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
-
-#function to plot the forecast  
-plot_hybrid_forecast<- function(){
-  nahead<-input$nahead
-  code<- input$incident
-  if(!file.exists("log_run.csv")){
-    print("First run !!! click train")
- }
+  
+  #function to plot the forecast  
+  plot_hybrid_forecast<- function(){
+    nahead<-input$nahead
+    code<- input$incident
+    if(!file.exists("log_run.csv")){
+      print("First run !!! click train")
+    }
     #fitted values and residues are store in log_run.csv 
     mdata<- read.csv("log_run.csv")
     #forecast values are stored in forecast.csv.
@@ -195,7 +274,7 @@ plot_hybrid_forecast<- function(){
     tdata <-xts(tsmdata_i$incident_count,order.by =as.Date(tsmdata_i$date ))
     ar_fited<-xts(tsmdata_i$arima_fitted ,order.by =as.Date(tsmdata_i$date ))
     res_ts <- xts(tsmdata_i$arima_residuals,order.by =as.Date(tsmdata_i$date ))
-   
+    
     dnn_res_ts <-xts(tsmdata_i$nn_residuals,order.by =as.Date(tsmdata_i$date ))
     h_fitted_ts <- xts(tsmdata_i$hybrid_fitted,order.by =as.Date(tsmdata_i$date ))
     
@@ -225,9 +304,9 @@ plot_hybrid_forecast<- function(){
       
     }  
   }
-########################################
-#analyse_all_incidents and save results and model to file 
-analyse_all_incidents<- function(){  
+  ########################################
+  #analyse_all_incidents and save results and model to file 
+  analyse_all_incidents<- function(){  
     #data prepare master data time_series_m
     data<-read.csv("data.csv")
     mont<- factor(data$Month, levels= c(1:12), labels = c('Jan', 'Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))
@@ -236,12 +315,12 @@ analyse_all_incidents<- function(){
     data_clean$time<- time
     time_series_m <- NULL
     
-     for(c in unique(data_clean$Code)){
+    for(c in unique(data_clean$Code)){
       time_series<-xts(data_clean$Incidence.Count[data_clean$Code==c],
                        order.by =data_clean$time[data_clean$Code==c] ) 
       colnames(time_series)<-c
       time_series_m<- cbind(time_series_m,time_series)
-     }
+    }
     print("-I-Training ....")
     ###########################
     # analysis
@@ -250,14 +329,14 @@ analyse_all_incidents<- function(){
     q.max=input$q.max
     d.max=input$d.max
     #variables for accumulating data over multiple incidents
-      fdata_full <- NULL
-      mdata_full <- NULL
-      mb_list <- NULL
-      dnn_list <- NULL
-      p_nn_list <- NULL
-      error_df <- NULL
-      cross_v_df_m <- NULL
-      cross_v_df_m_avg_m <- NULL
+    fdata_full <- NULL
+    mdata_full <- NULL
+    mb_list <- NULL
+    dnn_list <- NULL
+    p_nn_list <- NULL
+    error_df <- NULL
+    cross_v_df_m <- NULL
+    cross_v_df_m_avg_m <- NULL
     #iterate over all the incidents 
     code_list<- unique(data_clean$Code)
     for (code in code_list[1:5]){  
@@ -270,54 +349,54 @@ analyse_all_incidents<- function(){
       #cross val
       #input<-list(nnsize=25,maxiter=150)
       for (j in 5:0){
-      tdata_val<- tdata[1:(nrow(tdata)-(nahead+j))]
-      #Create arima model and do validation 
-      #to see how the model predicted and actual results will look like 
-      #forecast is doen for last nahead value 
-      #this data is shown in plot and tables 
-      mb<-arma.model.selection(tdata_val,p.max,d.max, q.max)
-      model.arima<- mb$best.model
-      ar_predv<-forecast(model.arima, h=nahead)
-      
-      #NN model
-      
-      fit <- nnetar(tdata_val,size=input$nnsize, maxit=input$maxiter,p=input$nnp)
-      p_nn_v<-forecast(fit, h=nahead)
-      p_nn_fitted_v_ts<-xts(p_nn_v$fitted,order.by = index(tdata_val) )
-      p_nn_forecast_v_ts<- xts(p_nn_v$mean,order.by =index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)] ) )
-      
-      
-      
-      #Hybrid model concept 
-      #arima good in capturing linear effect
-      #so create arima model , residue from arima model will have nonlinear component
-      #nn is good in capturing nonlinear effect 
-      # create nn model of residues 
-      #sum of arima and nn give final results
-      
-      res <- residuals(model.arima)
-      res_ts<- xts(res,order.by = index(tdata_val))
-      fit <- nnetar(res_ts,size=input$nnsize, maxit=input$maxiter,p=input$nnp)
-      d_nn<-forecast(fit, h=nahead)
-      
-      
-      hybrid_prediction<- ar_predv$mean+d_nn$mean
-      
-      #for reference 
-      #print( sqrt(mean((hybrid_prediction[1:nahead]-tdata[(nrow(tdata)+1-nahead):nrow(tdata)])^2)))
-      #print( sqrt(mean((ar_predv$mean[1:nahead]-tdata[(nrow(tdata)+1-nahead):nrow(tdata)])^2)))
-      
-      pr_v_h<-xts(hybrid_prediction,order.by = index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]))
-      colnames(pr_v_h)<- "hybrid_validation_results"
-      pr_v_a<-xts(ar_predv$mean,order.by = index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]))
-      colnames(pr_v_a)<- "arima_validation_results"
-      
-      hybrid_residues_v<-pr_v_h-tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]
-      hybrid_residues_v_rms<- sqrt(mean(hybrid_residues_v^2,na.rm=TRUE))
-      hybrid_residues_fitted_v_rms<- sqrt(mean(d_nn$residuals^2,na.rm=TRUE))
-      
-      cross_v_df <- data.frame(code,j,val_rms=hybrid_residues_v_rms,fit_rms=hybrid_residues_fitted_v_rms)
-      cross_v_df_m<- rbind(cross_v_df_m,cross_v_df)
+        tdata_val<- tdata[1:(nrow(tdata)-(nahead+j))]
+        #Create arima model and do validation 
+        #to see how the model predicted and actual results will look like 
+        #forecast is doen for last nahead value 
+        #this data is shown in plot and tables 
+        mb<-arma.model.selection(tdata_val,p.max,d.max, q.max)
+        model.arima<- mb$best.model
+        ar_predv<-forecast(model.arima, h=nahead)
+        
+        #NN model
+        
+        fit <- nnetar(tdata_val,size=input$nnsize, maxit=input$maxiter,p=input$nnp)
+        p_nn_v<-forecast(fit, h=nahead)
+        p_nn_fitted_v_ts<-xts(p_nn_v$fitted,order.by = index(tdata_val) )
+        p_nn_forecast_v_ts<- xts(p_nn_v$mean,order.by =index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)] ) )
+        
+        
+        
+        #Hybrid model concept 
+        #arima good in capturing linear effect
+        #so create arima model , residue from arima model will have nonlinear component
+        #nn is good in capturing nonlinear effect 
+        # create nn model of residues 
+        #sum of arima and nn give final results
+        
+        res <- residuals(model.arima)
+        res_ts<- xts(res,order.by = index(tdata_val))
+        fit <- nnetar(res_ts,size=input$nnsize, maxit=input$maxiter,p=input$nnp)
+        d_nn<-forecast(fit, h=nahead)
+        
+        
+        hybrid_prediction<- ar_predv$mean+d_nn$mean
+        
+        #for reference 
+        #print( sqrt(mean((hybrid_prediction[1:nahead]-tdata[(nrow(tdata)+1-nahead):nrow(tdata)])^2)))
+        #print( sqrt(mean((ar_predv$mean[1:nahead]-tdata[(nrow(tdata)+1-nahead):nrow(tdata)])^2)))
+        
+        pr_v_h<-xts(hybrid_prediction,order.by = index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]))
+        colnames(pr_v_h)<- "hybrid_validation_results"
+        pr_v_a<-xts(ar_predv$mean,order.by = index(tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]))
+        colnames(pr_v_a)<- "arima_validation_results"
+        
+        hybrid_residues_v<-pr_v_h-tdata[(nrow(tdata)+1-(nahead+j)):(nrow(tdata)-j)]
+        hybrid_residues_v_rms<- sqrt(mean(hybrid_residues_v^2,na.rm=TRUE))
+        hybrid_residues_fitted_v_rms<- sqrt(mean(d_nn$residuals^2,na.rm=TRUE))
+        
+        cross_v_df <- data.frame(code,j,val_rms=hybrid_residues_v_rms,fit_rms=hybrid_residues_fitted_v_rms)
+        cross_v_df_m<- rbind(cross_v_df_m,cross_v_df)
       } 
       cross_v_df_m_avg_m<-data.frame(summarise(group_by(cross_v_df_m,code),avg_val_rms=mean(val_rms),avg_fitt_rms=mean(fit_rms)))
       
@@ -341,7 +420,7 @@ analyse_all_incidents<- function(){
       res <- residuals(model.arima)
       res_ts<- xts(res,order.by = index(tdata))
       colnames(res_ts)<- "arima_residuals"
-     
+      
       #nn 
       fit <- nnetar(tdata,size=input$nnsize, maxit=input$maxiter,p=input$nnp)
       p_nn<-forecast(fit, h=nahead)
@@ -411,7 +490,7 @@ analyse_all_incidents<- function(){
       #store model  data to variable 
       mdata<-cbind(tdata,ar_fited)
       mdata<-cbind(mdata,dnn_fitted_ts)
-       mdata<-cbind(mdata,h_fitted_ts)
+      mdata<-cbind(mdata,h_fitted_ts)
       mdata<-cbind(mdata,p_nn_fitted_ts)
       
       mdata<-cbind(mdata,res_ts)
@@ -436,33 +515,33 @@ analyse_all_incidents<- function(){
       #save the best models 
       save(dnn_list,mb_list,p_nn_list,file=model_file)
     }
-}
-
-# Histogram Reaction function
-
-run_hist <- function(hour_range,date_range) {
-  filter(serverData,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
-    mutate(days=day(datetimehourly),
-           hours=hour(datetimehourly),
-           hours_ampm=if_else(hours<13,paste0(hours,' AM'),paste0(hours-12,' PM')),
-           hours_ampm=recode(hours_ampm,`0 AM`='12 AM',
-                             `12 AM`='12 PM'),
-           hours_ampm=factor(hours_ampm,levels=c(paste0(c(12,1:11),' AM'),
-                                                 paste0(c(12,1:11),' PM'))),
-           highlight_hour=if_else(hours==hour(Sys.time()),TRUE,FALSE)) %>% 
-    filter(hours>hour_range[1] & hours<hour_range[2]) %>% 
-    ggplot(aes(x=hours_ampm)) + geom_bar(aes(fill=highlight_hour)) +
-    theme_minimal() + theme(panel.grid=element_blank()) + 
-    xlab("") + ylab("Queue Lines") +
-    guides(fill=FALSE) + 
-    scale_fill_brewer()
-
+  }
   
+  # Histogram Reaction function
   
+  run_hist <- function(hour_range,date_range) {
+    filter(serverData,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
+      mutate(days=day(datetimehourly),
+             hours=hour(datetimehourly),
+             hours_ampm=if_else(hours<13,paste0(hours,' AM'),paste0(hours-12,' PM')),
+             hours_ampm=recode(hours_ampm,`0 AM`='12 AM',
+                               `12 AM`='12 PM'),
+             hours_ampm=factor(hours_ampm,levels=c(paste0(c(12,1:11),' AM'),
+                                                   paste0(c(12,1:11),' PM'))),
+             highlight_hour=if_else(hours==hour(Sys.time()),TRUE,FALSE)) %>% 
+      filter(hours>hour_range[1] & hours<hour_range[2]) %>% 
+      ggplot(aes(x=hours_ampm)) + geom_bar(aes(fill=highlight_hour)) +
+      theme_minimal() + theme(panel.grid=element_blank()) + 
+      xlab("") + ylab("Queue Lines") +
+      guides(fill=FALSE) + 
+      scale_fill_brewer()
     
-}
+    
+    
+    
+  }
   
-#######################################  
+  #######################################  
   # read_table_data <- function(){
   #   data<-read.csv("data.csv")
   #   return(unique(data$Code))
@@ -491,19 +570,19 @@ run_hist <- function(hour_range,date_range) {
   #                                   #}
   #                                     })
   output$hist_react <- renderPlot({
-      run_hist(input$highlight_hist,input$date_time) %>% 
+    run_hist(input$highlight_hist,input$date_time) %>% 
       print
   })
   observeEvent(input$train, {
-                            if(!file.exists("data.csv")){
-                              print("-E- Input file data.csv !!! Not found in directory")
-                              return()
-                            } else {
-    
-                            analyse_all_incidents()
-                            }
-                            }
-               )
+    if(!file.exists("data.csv")){
+      print("-E- Input file data.csv !!! Not found in directory")
+      return()
+    } else {
+      
+      analyse_all_incidents()
+    }
+  }
+  )
   
   # output$table_data <- DT::renderDataTable({
   #                         input$train
@@ -514,7 +593,7 @@ run_hist <- function(hour_range,date_range) {
   #                         })
   output$next_expected_h2_delivery <-renderPrint(print("dummy2"))
   output$today_rush_hours <-renderPrint(print("dummy3"))
-
- 
-
+  
+  
+  
 })
