@@ -67,14 +67,14 @@ shinyUI(fluidPage(
       fluidPage(
         titlePanel("Anaheim Station Forecasts"),
         fluidRow(
-          column(8,
+          column(9,
                  #plotOutput("plot_main", width = 800, height = 600),
                  #plotOutput('hist_react',width=800,height=500),
                  #h2("Traffic and Weather Updates"),
                  #DT::dataTableOutput('table_data_fore'),
                  #h2("Special Notes Table"),
                  #DT::dataTableOutput('table_error'),
-                 plotlyOutput("barplot", height = "auto"),
+                 plotlyOutput("barplot", width = "100%"),
                  br(),
                  actionButton("prevDay", "Previous Day"), 
                  actionButton("nextDay", "Next Day"),

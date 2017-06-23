@@ -161,6 +161,10 @@ shinyServer(function(input, output, session) {
       scale_fill_gradient(low = "#1A9850", high = "#D73027", limits=c(0,1)) +
       theme(legend.title=element_blank())
     finalPlot <- ggplotly(final) %>% config(displayModeBar = F) %>% layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE))
+    finalPlot$x$layout$width <- NULL
+    finalPlot$x$layout$height <- NULL
+    finalPlot$width <- NULL
+    finalPlot$height <- NULL
     return(finalPlot)
   })
   
