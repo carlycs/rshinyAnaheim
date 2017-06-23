@@ -168,9 +168,9 @@ shinyServer(function(input, output, session) {
     makeBarplot()
   })
   
-  output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
-  output$queueLength <- renderPrint(print(dateData$dataFrame$queueline))
-  output$outofgaslikelihood <- renderPrint(print(dateData$dataFrame$outofgaslikelihood))
+  output$queueDay <- renderPrint(print(dateData$dateFrame$yearMonthDay[1]))
+  output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
+  output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
 
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){
