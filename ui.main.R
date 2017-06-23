@@ -33,11 +33,12 @@ ui.main <-
                    #numericInput('nahead', 'Number of Rush Hours to List', 3,min = 1, max = 5),
                    #h4("Results"),
                    
-                   h4("Results"),
-                   h5("Queue Line"),
-                   uiOutput("queueDay"),
-                   uiOutput("queueLength"),
-                   textOutput(serverData$queueline[12]),
+                   # h4("Results"),
+                   # h5("Queue Line"),
+                   # uiOutput("queueDay"),
+                   # uiOutput("queueLength"),
+                   # textOutput(serverData$queueline[12]),
+                   
                    #h5("Next Expected H2 Delivery"),
                    #verbatimTextOutput("next_expected_h2_delivery"),
                    #h5("Today Rush Hours"),
@@ -69,9 +70,16 @@ ui.main <-
                  #DT::dataTableOutput('table_data_fore'),
                  #h2("Special Notes Table"),
                  #DT::dataTableOutput('table_error'),
+                 plotlyOutput("queueplot", width = "100%"),
+                 fluidRow(
+                   column(width = 3, offset=3, actionButton("prevDay", "Previous Day")),
+                   column(width = 3, actionButton("nextDay", "Next Day"))
+                 ),
                  plotlyOutput("barplot", width = "100%"),
                  br(),
-                 div(actionButton("prevDay", "Previous Day"), actionButton("nextDay", "Next Day"), align = "center"),
+                 # div(actionButton("prevDay", "Previous Day"),
+                 #     actionButton("nextDay", "Next Day"), 
+                 #     align = "center"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
                  DT::dataTableOutput('table_val'),
                  DT::dataTableOutput('table_data')
