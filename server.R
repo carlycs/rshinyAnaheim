@@ -136,9 +136,9 @@ shinyServer(function(input, output, session) {
   
   output$appTitle <- renderUI({
     if(login()$role == "Manager"){
-      titlePanel(paste0("Configuration", login()$role), windowTitle = "Anaheim Station Forecasts")
+      titlePanel(paste0("Configuration ", login()$role), windowTitle = "Anaheim Station Forecasts")
     } else if(login()$role == "User"){
-      titlePanel(paste0(login()$role, "blah"), windowTitle = "Anaheim Station Forecasts")
+      titlePanel(paste0("Anaheim Station"), windowTitle = "Anaheim Station Forecasts")
     }
   })
   
@@ -226,36 +226,72 @@ shinyServer(function(input, output, session) {
     chosenDate$date <- input$calendarDateInput
     stateTracker$activeDate <- chosenDate$date
     dateData$dateFrame <- subset(serverData, yearMonthDay == chosenDate$date)
-    output$barplot <- renderPlotly({makeBarplot()})
+    output$barplot <- renderPlotly({ makeBarplot()$Likelihood })
+    output$queueplot <- renderPlotly({ makeBarplot()$Queue })
   })
   
   # Function to make barplot, and check for empty dataframe
   makeBarplot <- reactive({
-    p <- ggplot(dateData$dateFrame, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
+    plotList <- list()
+    plotDf <- dateData$dateFrame
+    p <- ggplot(plotDf, aes(x=hour,fill=outofgaslikelihood)) + geom_bar(aes(weight=outofgaslikelihood))
     p <- p + labs(x = "Hour", y = "Out of Gas Likelihood", 
                   title = paste0("Out of Gas Likelihood By Hour For ",
                                  format(dateToday,format="%B %d, %Y"))
     )
     final <- p + scale_y_continuous(expand = c(0,1)) + ylim(0,1.0) + 
       scale_fill_gradient(low = "#1A9850", high = "#D73027", limits=c(0,1)) +
-      theme(legend.title=element_blank(), axis.text.x = element_text(angle = 45)) # Change label angle here
+      theme(legend.title=element_blank(), 
+            axis.text.x = element_text(angle = 45),
+            panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+            panel.background = element_blank(), axis.line = element_line(colour = "black")
+      ) # Change label angle here
     finalPlot <- ggplotly(final) %>% config(displayModeBar = F) %>% layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE))
     finalPlot$x$layout$width <- NULL
     finalPlot$x$layout$height <- NULL
     finalPlot$width <- NULL
     finalPlot$height <- NULL
-    return(finalPlot)
+    plotList$Likelihood <- finalPlot
+    
+    p <- 
+      ggplot(plotDf, aes(x=hour, y=queueline)) + 
+      geom_col() + 
+      labs(x = "Hour", y = "Queue Length", 
+           title = paste0("Queue Length By Hour For ",
+                          format(dateToday,format="%B %d, %Y"))
+      )
+    final <- p +
+      theme(
+        legend.title=element_blank(), 
+        axis.text.x = element_text(angle = 45),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")
+      ) # Change label angle here
+    finalPlot <- ggplotly(final) %>% config(displayModeBar = F) %>% 
+      layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE))
+    finalPlot$x$layout$width <- NULL
+    finalPlot$x$layout$height <- NULL
+    finalPlot$width <- NULL
+    finalPlot$height <- NULL
+    
+    plotList$Queue <- finalPlot
+    
+    plotList
   })
   
   # Function that acutally outputs barplot plotly object
   output$barplot <- renderPlotly({
-    makeBarplot()
+    makeBarplot()$Likelihood
+  })
+  
+  output$queueplot <- renderPlotly({
+    makeBarplot()$Queue
   })
   
   # Data outputs
-  output$queueDay <- renderPrint(print(dateData$dateFrame$yearMonthDay[1]))
-  output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
-  output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
+  # output$queueDay <- renderPrint(print(dateData$dateFrame$yearMonthDay[1]))
+  # output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
+  # output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
   
   #function to plot the forecast  
   plot_hybrid_forecast<- function(){
@@ -518,7 +554,6 @@ shinyServer(function(input, output, session) {
   }
   
   # Histogram Reaction function
-  
   run_hist <- function(hour_range,date_range) {
     filter(serverData,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
       mutate(days=day(datetimehourly),
@@ -535,10 +570,6 @@ shinyServer(function(input, output, session) {
       xlab("") + ylab("Queue Lines") +
       guides(fill=FALSE) + 
       scale_fill_brewer()
-    
-    
-    
-    
   }
   
   #######################################  

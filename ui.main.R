@@ -38,6 +38,7 @@ ui.main <-
                    uiOutput("queueDay"),
                    uiOutput("queueLength"),
                    textOutput(serverData$queueline[12]),
+                   
                    #h5("Next Expected H2 Delivery"),
                    #verbatimTextOutput("next_expected_h2_delivery"),
                    #h5("Today Rush Hours"),
@@ -70,6 +71,8 @@ ui.main <-
                  #h2("Special Notes Table"),
                  #DT::dataTableOutput('table_error'),
                  plotlyOutput("barplot", width = "100%"),
+                 br(),
+                 plotlyOutput("queueplot", width = "100%"),
                  br(),
                  div(actionButton("prevDay", "Previous Day"), actionButton("nextDay", "Next Day"), align = "center"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
