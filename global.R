@@ -12,8 +12,11 @@ library(plotly)
 #some dummy data to start the develepement cycle on ui.R and server.R
 #everyline stores data for one hour
 serverData <- read_csv("data.csv")
+
 serverData$datetimehourly <- mdy_hm(serverData$datetimehourly, tz = "UTC")
+serverData$datetimehourly <- as.POSIXct(serverData$datetimehourly)
 serverData$yearMonthDay <- as.POSIXct(format(serverData$datetimehourly, format = "%Y-%m-%d"))
+serverData$hour <- format(serverData$datetimehourly, format = "%H")
 
 set_time <- function() {
   this_hour <- hour(Sys.time())

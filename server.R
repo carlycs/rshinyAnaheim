@@ -130,7 +130,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  
   dateData <- reactiveValues(dateFrame = subset(serverData, yearMonthDay == dateToday))
   output$dateDataDebug <- renderPrint(
     str(isolate(dateData$dateFrame))
@@ -140,6 +139,10 @@ shinyServer(function(input, output, session) {
     dateData$dateFrame <- subset(serverData,yearMonthDay==chosenDate$date)
     }
   )
+  
+  # output$histogram <- renderPlotly(
+  #   queueHistogram <- plot_ly(x = )
+  # )
   
   output$queueDay <- renderPrint(print(dateData$dataFrame$queueline[1]))
   output$queueLength <- renderPrint(print(dateData$dataFrame$queueline))
