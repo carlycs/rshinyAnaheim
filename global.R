@@ -40,3 +40,77 @@ set_time <- function() {
 
 #send back the following values to the server.R for rendering
 
+
+# Login Related:
+userAuthDatabase <- data.frame(UserId=c("Hoofar", "Leon"),
+                               Password=c("Manager", "User"),
+                               Roles=c("Manager", "User"))
+
+validateLogin <- function(userId, password){
+  stopifnot(exists("userAuthDatabase"))
+  authResult <- filter(userAuthDatabase, UserId == userId & Password == password)
+  if(nrow(authResult) == 1){
+    # Successful login
+    with(
+      authResult,
+      list(login=T, user = as.character(userId), role = as.character(Roles))
+    )
+  }
+  else {
+    # Unsuccessful login
+    list(login=F, user = NULL, role = NULL)
+  }
+}
+
+composeLoginModal <- function(...)
+  # generate a modal with the inputs for a login a well as initialization
+  # and password recovery links
+{
+  showModal(
+    modalDialog(
+      id        = "loginmodal"
+      , size      = 's'
+      , easyClose = FALSE 
+      , div(
+        id = "modal-contents"
+        , textInput('login_user', 'Login')
+        , passwordInput('login_passwd', 'Password')
+        , div(...)
+        , actionButton(
+          inputId = 'login_button'
+          , label   = 'Login'
+          , class   = 'btn action-button btn-success'
+          , icon    = icon('sign-in')
+        ) #/ login-button
+      ) #/ modal-contents
+      # , footer = div(id = "modal-footer" 
+      #                , a(id = "forgot-login-link"
+      #                    , href = forgot_password_message
+      #                    , p("Forgot Password", style = "display: inline;")
+      #                )
+      #                , HTML("&bull;")
+      #                , a(id = "request-login-link"
+      #                    , href = request_login_message
+      #                    , p("Request Login", style = "display: inline;")
+      #                )
+      # ) #/ modal-footer
+    ) #/ modalDialog
+  ) #/ showModal
+}
+
+showConfirmModal <- function(id, ...) {
+  showModal(
+    modalDialog(
+      id        = sprintf("%s-confirm-modal", id)
+      , size      = 's'
+      , easyClose = TRUE
+      , div(...)
+      , div(style = "text-align: right"
+            , actionButton(sprintf("%s_ok", id), "OK", icon = icon("check"), style = "display: inline;")
+            , actionButton(sprintf("%s_cancel", id), "Cancel", icon = icon("times"), style = "display: inline;")
+      )
+      , footer = NULL
+    ) #/ modalDialog
+  ) #/ showModal
+}
+
