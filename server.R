@@ -138,9 +138,9 @@ shinyServer(function(input, output, session) {
   
   
   
-  output$queueLength <- renderPrint(print(serverdata$queueline[12]))
-  output$queueDay <- renderPrint(print(serverdata$datetimehourly[12]))
-  output$outofgaslikelihood <- renderPrint(print(serverdata$outofgaslikelihood[12]))
+  output$queueLength <- renderPrint(print(serverData$queueline[12]))
+  output$queueDay <- renderPrint(print(serverData$datetimehourly[12]))
+  output$outofgaslikelihood <- renderPrint(print(serverData$outofgaslikelihood[12]))
 
 #function to plot the forecast  
 plot_hybrid_forecast<- function(){
@@ -405,7 +405,7 @@ analyse_all_incidents<- function(){
 # Histogram Reaction function
 
 run_hist <- function(hour_range,date_range) {
-  filter(serverdata,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
+  filter(serverData,datetimehourly>date_range[1] & datetimehourly<date_range[2]) %>% 
     mutate(days=day(datetimehourly),
            hours=hour(datetimehourly),
            hours_ampm=if_else(hours<13,paste0(hours,' AM'),paste0(hours-12,' PM')),

@@ -11,9 +11,9 @@ library(plotly)
 #function.R wrapper function for getting and receiving data from server.R 
 #some dummy data to start the develepement cycle on ui.R and server.R
 #everyline stores data for one hour
-serverdata <- read_csv("data.csv")
-serverdata$datetimehourly <- mdy_hm(serverdata$datetimehourly, tz = "UTC")
-serverdata$yearMonthDay <- format(serverdata$datetimehourly, format = "%Y-%m-%d")
+serverData <- read_csv("data.csv")
+serverData$datetimehourly <- mdy_hm(serverData$datetimehourly, tz = "UTC")
+serverData$yearMonthDay <- format(serverData$datetimehourly, format = "%Y-%m-%d")
 
 set_time <- function() {
   this_hour <- hour(Sys.time())
