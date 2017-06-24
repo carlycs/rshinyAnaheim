@@ -42,7 +42,7 @@ set_time <- function() {
 
 
 # Login Related:
-userAuthDatabase <- data.frame(UserId=c("Hoofar", "Leon"),
+userAuthDatabase <- data.frame(UserId=c("Hoofar", "User"),
                                Password=c("Manager", "User"),
                                Roles=c("Manager", "User"))
 
