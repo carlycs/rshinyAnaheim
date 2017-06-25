@@ -93,7 +93,10 @@ shinyServer(function(input, output, session) {
   
   output$appTitle <- renderUI({
     if(login()$role == "Manager"){
-      titlePanel(paste0("Account Type: ", login()$role), windowTitle = "Anaheim Station Forecasts")
+
+      
+      titlePanel(paste0("Configuration ", login()$role), windowTitle = "Anaheim Station Forecasts")
+
     } else if(login()$role == "User"){
       titlePanel(paste0("Anaheim Station"), windowTitle = "Anaheim Station Forecasts")
     }
@@ -250,7 +253,57 @@ shinyServer(function(input, output, session) {
   # output$queueLength <- renderPrint(print(dateData$dateFrame$queueline))
   # output$outofgaslikelihood <- renderPrint(print(dateData$dateFrame$outofgaslikelihood))
   
+
   
+=======
+  #function to plot the forecast  
+  plot_hybrid_forecast<- function(){
+    nahead<-input$nahead
+    code<- input$incident
+    if(!file.exists("log_run.csv")){
+      print("First run !!! click train")
+    }
+    #fitted values and residues are store in log_run.csv 
+    mdata<- read.csv("log_run.csv")
+    #forecast values are stored in forecast.csv.
+    fdata<- read.csv("forecast.csv")
+    tsmdata_i<-mdata[mdata$code==input$incident,]
+    tsfdata_i<-fdata[fdata$code==input$incident,]
+    #recreate the time series of data,fitted value and residue for ploting
+    tdata <-xts(tsmdata_i$incident_count,order.by =as.Date(tsmdata_i$date ))
+    ar_fited<-xts(tsmdata_i$arima_fitted ,order.by =as.Date(tsmdata_i$date ))
+    res_ts <- xts(tsmdata_i$arima_residuals,order.by =as.Date(tsmdata_i$date ))
+    
+    dnn_res_ts <-xts(tsmdata_i$nn_residuals,order.by =as.Date(tsmdata_i$date ))
+    h_fitted_ts <- xts(tsmdata_i$hybrid_fitted,order.by =as.Date(tsmdata_i$date ))
+    
+    
+    pr_v_a<-xts(tsfdata_i$arima_validation_results,order.by =as.Date(index(tdata[(nrow(tdata)+1-nahead):nrow(tdata)] )))
+    pr_v_h<- xts(tsfdata_i$hybrid_validation_results,order.by =as.Date(index(tdata[(nrow(tdata)+1-nahead):nrow(tdata)] ) ))
+    p_nn_forecast_v_ts<- xts(tsfdata_i$nn_val_results,order.by =as.Date(index(tdata[(nrow(tdata)+1-nahead):nrow(tdata)] ) ))
+    
+    rr_f <- xts(tsfdata_i$ARIMA_forecast ,order.by =as.Date(tsfdata_i$date ))
+    pr_f<- xts(tsfdata_i$hybrid_forecast ,order.by =as.Date(tsfdata_i$date ))
+    p_nn_forecast_ts<- xts(tsfdata_i$NN_forecast,order.by =as.Date(tsfdata_i$date ) )
+    
+    
+    p_nn_fitted_ts<-xts(tsmdata_i$nn_fitted,order.by = as.Date(index(tdata) ))
+    p_nn_residuals_ts<-xts(tsmdata_i$nn_residuals,order.by = as.Date(index(tdata) ))
+    
+    
+    #make plots based on the selection of inputs   
+    if(input$model=="ARIMA" & input$resi_plot=="Incident count"){
+      par(mfrow=c(1,1))
+      plot(tdata,xlim=as.POSIXct(c(min(index(tdata)),  max(index(tdata))+(nahead+1)*31)),
+           ylim=c(min(tdata,ar_fited,rr_f,na.rm = TRUE)-2, max(tdata,rr_f,ar_fited,na.rm = TRUE)+2 ) ,type="b",main=paste("ARMIA Model Prediction ",code),ylab="Incident Count")
+      lines(ar_fited,col="green",type="b")
+      lines(pr_v_a,col="red",type="b")
+      lines(rr_f,col="blue",type="b")
+      legend("topleft", c("Actual Value","Predicted during Validation","Forecast","Fitted Value"), col=c("black","red","blue","green"), lty=1)
+      
+    }  
+  }
+
   ########################################
 
   
