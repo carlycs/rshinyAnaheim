@@ -61,7 +61,7 @@ ui.main <-
       
       # Show a plot of the generated distribution
       mainPanel(
-        (titlePanel("Anaheim Station Forecasts")),
+        (titlePanel("Anaheim Station")),
         fluidRow(
           column(9,
                  #plotOutput("plot_main", width = 800, height = 600),
@@ -70,10 +70,11 @@ ui.main <-
                  #DT::dataTableOutput('table_data_fore'),
                  #h2("Special Notes Table"),
                  #DT::dataTableOutput('table_error'),
-                 plotlyOutput("barplot", width = "100%"),
-                 br(),
                  plotlyOutput("queueplot", width = "100%"),
                  br(),
+                 plotlyOutput("barplot", width = "100%"),
+                 br(),
+
                  div(actionButton("prevDay", "Previous Day"), actionButton("nextDay", "Next Day"), align = "center"),
                  #actionButton(adddayvalue, "Next Day"), Should run the model for the next day and list results. 
                  DT::dataTableOutput('table_val'),
