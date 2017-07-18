@@ -1,3 +1,11 @@
 .Rhistory
 app/.Rproj.user*/
 .Rproj.user
+
+#Mac 
+._* 
+.DS_Store
+#git
+.gitignore
+.git/*
+.git
